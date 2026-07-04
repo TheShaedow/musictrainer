@@ -67,61 +67,88 @@ function showSolution(){if(!current)return;locked=true;[...choices.children].for
 function setFeedback(a,b,cls){feedback.className='feedback '+cls;feedback.innerHTML=a+'<small>'+b+'</small>'}
 function updateStats(){$('streak').textContent=streak;$('score').textContent=score;$('rate').textContent=total?Math.round(good/total*100)+'%':'0%'}
 function addHistory(q,a,ok){const historyBox=$('history');if(!historyBox)return;let r=document.createElement('div');r.className='row';r.innerHTML=`<span><b>${q}</b><br><small>${a}</small></span><b class="${ok?'ok':'no'}">${ok?'✔':'✘'}</b>`;historyBox.prepend(r);while(historyBox.children.length>14)historyBox.lastChild.remove()}
-function drawStaff(acc){staff.innerHTML='';const top=38,gap=11,left=80,right=720;for(let i=0;i<5;i++)line(left,top+i*gap,right,top+i*gap,'noteLine');text(30,92,'𝄞','clef');if(acc===null||acc===undefined){txt(385,82,'Vorzeichen erscheinen hier',18,'#64748b','middle');return}
- const isSharp=acc>0, sym=isSharp?'♯':'♭', count=Math.abs(acc);
- // Vertikale Positionen im Violinschlüssel. Die Werte sind optisch für die SVG-Glyphen feinjustiert,
- // damit die Mitte des Zeichens auf der jeweiligen Linie bzw. im Zwischenraum sitzt.
- // Exakte Oktavlagen im Violinschlüssel:
- // Linien: F5=oberste Linie, D5=4. Linie, B4=mittlere Linie, G4=2. Linie, E4=unterste Linie.
- // Räume: G5=Raum über dem System, E5=oberster Zwischenraum, C5=3. Zwischenraum,
- // A4=2. Zwischenraum, F4=unterster Zwischenraum.
- const ySharp={F:38,C:43.5,G:27,D:49,A:65.5,E:82,B:60};
- const yFlat={B:60,E:32.5,A:65.5,D:49,G:71,C:43.5,F:76.5};
- // Professionell wirkende horizontale Setzung: nicht einfach i*Abstand.
- // Für Kreuz-Tonarten wird je nach Anzahl ein kompakter, gestaffelter Satz benutzt.
- // Beispiele: A-Dur = Fis, Cis, Gis; E-Dur = Cis, Fis, Dis, Gis.
- const sharpLayout={
-   1:['F'],
-   2:['F','C'],
-   3:['F','C','G'],
-   4:['C','F','D','G'],
-   5:['C','F','D','G','A'],
-   6:['C','F','D','G','A','E'],
-   7:['C','F','D','G','A','E','B']
- };
- const flatLayout={
-   1:['B'],
-   2:['B','E'],
-   3:['B','E','A'],
-   4:['B','E','A','D'],
-   5:['B','E','A','D','G'],
-   6:['B','E','A','D','G','C'],
-   7:['B','E','A','D','G','C','F']
- };
- const layout=isSharp?sharpLayout[count]:flatLayout[count];
- const xOffsets=isSharp?{
-   1:[0],
-   2:[0,42],
-   3:[0,42,84],
-   4:[0,38,76,114],
-   5:[0,38,76,114,152],
-   6:[0,38,76,114,152,190],
-   7:[0,38,76,114,152,190,228]
- }:{
-   1:[0],
-   2:[0,39],
-   3:[0,39,78],
-   4:[0,39,78,117],
-   5:[0,39,78,117,156],
-   6:[0,39,78,117,156,195],
-   7:[0,39,78,117,156,195,234]
- };
- const xStart=isSharp?122:124, yMap=isSharp?ySharp:yFlat;
- for(let i=0;i<layout.length;i++){
-   const note=layout[i],x=xStart+xOffsets[count][i],y=yMap[note];
-   txt(x,y,sym,34,'#101631','middle','acc');
- }
- txt(430,124,accText(acc),18,'#334155','middle')}
+function drawStaff(acc){
+  staff.innerHTML='';
+  const top=38,gap=11,left=80,right=720;
+  for(let i=0;i<5;i++)line(left,top+i*gap,right,top+i*gap,'noteLine');
+  text(30,92,'𝄞','clef');
+  if(acc===null||acc===undefined){
+    txt(385,82,'Vorzeichen erscheinen hier',18,'#64748b','middle');
+    return;
+  }
+
+  const isSharp=acc>0, count=Math.abs(acc);
+
+  // Korrekte Zeichensetzung im Violinschlüssel:
+  // Kreuze immer links nach rechts: Fis, Cis, Gis, Dis, Ais, Eis, His.
+  // Positionen:
+  // Fis = 5. Linie, Cis = 3. Zwischenraum, Gis = Raum über dem System,
+  // Dis = 4. Linie, Ais = 2. Zwischenraum, Eis = 4. Zwischenraum, His = 3. Linie.
+  const sharpOrder=['F','C','G','D','A','E','B'];
+  const sharpY={
+    F:38,    // Fis: oberste Linie
+    C:54.5,  // Cis: 3. Zwischenraum
+    G:27,    // Gis: Raum über dem System
+    D:49,    // Dis: 4. Linie
+    A:65.5,  // Ais: 2. Zwischenraum
+    E:43.5,  // Eis: 4. Zwischenraum
+    B:60     // His: 3. Linie
+  };
+
+  // Bs immer links nach rechts: B, Es, As, Des, Ges, Ces, Fes.
+  // Positionen im Violinschlüssel:
+  // B = 3. Linie, Es = 4. Zwischenraum, As = 2. Zwischenraum,
+  // Des = 4. Linie, Ges = 2. Linie, Ces = 3. Zwischenraum, Fes = 1. Zwischenraum.
+  const flatOrder=['B','E','A','D','G','C','F'];
+  const flatY={
+    B:60,    // B: 3. Linie
+    E:43.5,  // Es: 4. Zwischenraum
+    A:65.5,  // As: 2. Zwischenraum
+    D:49,    // Des: 4. Linie
+    G:71,    // Ges: 2. Linie
+    C:54.5,  // Ces: 3. Zwischenraum
+    F:76.5   // Fes: 1. Zwischenraum
+  };
+
+  const order=isSharp?sharpOrder:flatOrder;
+  const yMap=isSharp?sharpY:flatY;
+  const xStart=132;
+  const xGap=isSharp?34:31;
+
+  for(let i=0;i<count;i++){
+    const note=order[i], x=xStart+i*xGap, y=yMap[note];
+    if(isSharp) drawSharpAcc(x,y);
+    else drawFlatAcc(x,y);
+  }
+  txt(430,124,accText(acc),18,'#334155','middle')
+}
+
+function drawSharpAcc(x,y){
+  // Eigene SVG-Glyphe statt Unicode-Zeichen: dadurch stimmt die Mitte exakt mit Linie/Zwischenraum.
+  const c='#101631', sw=3.2;
+  svgLine(x-6,y-17,x-6,y+17,c,sw);
+  svgLine(x+6,y-19,x+6,y+15,c,sw);
+  svgLine(x-13,y-6,x+13,y-10,c,sw);
+  svgLine(x-13,y+7,x+13,y+3,c,sw);
+}
+
+function drawFlatAcc(x,y){
+  const c='#101631', sw=3.2;
+  svgLine(x-3,y-22,x-3,y+12,c,sw);
+  svgPathLocal(`M ${x-3} ${y-1} C ${x+13} ${y-10} ${x+17} ${y+5} ${x-3} ${y+13}`,c,sw,'none');
+}
+function svgLine(x1,y1,x2,y2,c,w){
+  let l=document.createElementNS('http://www.w3.org/2000/svg','line');
+  l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);
+  l.setAttribute('stroke',c);l.setAttribute('stroke-width',w);l.setAttribute('stroke-linecap','round');
+  staff.append(l);
+}
+function svgPathLocal(d,c,w,fill='none'){
+  let p=document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d',d);p.setAttribute('stroke',c);p.setAttribute('stroke-width',w);
+  p.setAttribute('stroke-linecap','round');p.setAttribute('stroke-linejoin','round');p.setAttribute('fill',fill);
+  staff.append(p);
+}
 function line(x1,y1,x2,y2,cls){let l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('class',cls);staff.append(l)}
 function text(x,y,s,cls){let t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x',x);t.setAttribute('y',y);t.setAttribute('class',cls);t.textContent=s;staff.append(t)}
 function txt(x,y,s,size,fill,anchor='start',cls=''){let t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x',x);t.setAttribute('y',y);t.setAttribute('font-size',size);t.setAttribute('fill',fill);t.setAttribute('font-weight','900');t.setAttribute('text-anchor',anchor);t.setAttribute('dominant-baseline','middle');if(cls)t.setAttribute('class',cls);t.textContent=s;staff.append(t)}
