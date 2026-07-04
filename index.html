@@ -71,8 +71,12 @@ function drawStaff(acc){staff.innerHTML='';const top=38,gap=11,left=80,right=720
  const isSharp=acc>0, sym=isSharp?'♯':'♭', count=Math.abs(acc);
  // Vertikale Positionen im Violinschlüssel. Die Werte sind optisch für die SVG-Glyphen feinjustiert,
  // damit die Mitte des Zeichens auf der jeweiligen Linie bzw. im Zwischenraum sitzt.
- const ySharp={F:42,C:54.5,G:71,D:49,A:65.5,E:43.5,B:60};
- const yFlat={B:60,E:43.5,A:65.5,D:49,G:71,C:54.5,F:76.5};
+ // Exakte Oktavlagen im Violinschlüssel:
+ // Linien: F5=oberste Linie, D5=4. Linie, B4=mittlere Linie, G4=2. Linie, E4=unterste Linie.
+ // Räume: G5=Raum über dem System, E5=oberster Zwischenraum, C5=3. Zwischenraum,
+ // A4=2. Zwischenraum, F4=unterster Zwischenraum.
+ const ySharp={F:38,C:43.5,G:27,D:49,A:65.5,E:82,B:60};
+ const yFlat={B:60,E:32.5,A:65.5,D:49,G:71,C:43.5,F:76.5};
  // Professionell wirkende horizontale Setzung: nicht einfach i*Abstand.
  // Für Kreuz-Tonarten wird je nach Anzahl ein kompakter, gestaffelter Satz benutzt.
  // Beispiele: A-Dur = Fis, Cis, Gis; E-Dur = Cis, Fis, Dis, Gis.
@@ -97,12 +101,12 @@ function drawStaff(acc){staff.innerHTML='';const top=38,gap=11,left=80,right=720
  const layout=isSharp?sharpLayout[count]:flatLayout[count];
  const xOffsets=isSharp?{
    1:[0],
-   2:[0,39],
-   3:[0,39,78],
-   4:[0,34,72,106],
-   5:[0,34,72,106,142],
-   6:[0,34,72,106,142,176],
-   7:[0,34,72,106,142,176,212]
+   2:[0,42],
+   3:[0,42,84],
+   4:[0,38,76,114],
+   5:[0,38,76,114,152],
+   6:[0,38,76,114,152,190],
+   7:[0,38,76,114,152,190,228]
  }:{
    1:[0],
    2:[0,39],
