@@ -66,10 +66,11 @@ function answer(o,btn){if(!current||locked)return;locked=true;total++;let ok=o==
 function showSolution(){if(!current)return;locked=true;[...choices.children].forEach(x=>{if(x.textContent===current.answer)x.classList.add('good')});setFeedback('Lösung angezeigt',current.detail,'');drawStaff(current.staffAcc);showInfo(current.k)}
 function setFeedback(a,b,cls){feedback.className='feedback '+cls;feedback.innerHTML=a+'<small>'+b+'</small>'}
 function updateStats(){$('streak').textContent=streak;$('score').textContent=score;$('rate').textContent=total?Math.round(good/total*100)+'%':'0%'}
-function addHistory(q,a,ok){let r=document.createElement('div');r.className='row';r.innerHTML=`<span><b>${q}</b><br><small>${a}</small></span><b class="${ok?'ok':'no'}">${ok?'✔':'✘'}</b>`;history.prepend(r);while(history.children.length>14)history.lastChild.remove()}
+function addHistory(q,a,ok){const historyBox=$('history');if(!historyBox)return;let r=document.createElement('div');r.className='row';r.innerHTML=`<span><b>${q}</b><br><small>${a}</small></span><b class="${ok?'ok':'no'}">${ok?'✔':'✘'}</b>`;historyBox.prepend(r);while(historyBox.children.length>14)historyBox.lastChild.remove()}
 function drawStaff(acc){staff.innerHTML='';const top=38,gap=11,left=80,right=720;for(let i=0;i<5;i++)line(left,top+i*gap,right,top+i*gap,'noteLine');text(30,92,'𝄞','clef');if(acc===null||acc===undefined){txt(385,82,'Vorzeichen erscheinen hier',18,'#64748b','middle');return}const order=acc>0?SHARP_ORDER:FLAT_ORDER;const sym=acc>0?'♯':'♭';// Korrekte vertikale Positionen der Vorzeichen im Violinschlüssel.
  // Linien bei top=38,49,60,71,82; Zwischenräume entsprechend bei .5.
- const ySharp={F:38,C:54.5,G:27,D:49,A:65.5,E:43.5,B:60};
+ // Fis wird für die SVG-Schrift optisch leicht tiefer gesetzt, damit das Kreuz wirklich auf der obersten Linie sitzt.
+ const ySharp={F:42,C:54.5,G:71,D:49,A:65.5,E:43.5,B:60};
  const yFlat={B:60,E:43.5,A:65.5,D:49,G:71,C:54.5,F:76.5};for(let i=0;i<Math.abs(acc);i++){let note=order[i],x=130+i*34,y=(acc>0?ySharp:yFlat)[note];txt(x,y,sym,34,'#101631','middle','acc')}txt(430,124,accText(acc),18,'#334155','middle')}
 function line(x1,y1,x2,y2,cls){let l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('class',cls);staff.append(l)}
 function text(x,y,s,cls){let t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x',x);t.setAttribute('y',y);t.setAttribute('class',cls);t.textContent=s;staff.append(t)}
